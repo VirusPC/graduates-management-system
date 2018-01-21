@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd" >
+<hibernate-mapping>
+	<class name="entity.Stu_Bu_View" table="student_bulletin">
+
+		<id name="bid" type="java.lang.Integer">
+			<generator class="native"></generator>
+		</id>
+		<property name="id" type="java.lang.String" length="8"/>
+		<property name="bname" type="java.lang.String" length="20"></property>
+		<property name="content" type="java.lang.String" length="300"></property>
+	</class>
+</hibernate-mapping>

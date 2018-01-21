@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+    <package name="default" namespace="/" extends="struts-default">
+		<default-action-ref name="notFound" />
+   		<action name="notFound">
+    		<result>/error.jsp</result>
+   		</action>
+   		<action name="upload" class="action.FileUploadAction">
+    		<!-- 配置拦截器限制上传文件类型及大小 -->
+    		<interceptor-ref name="defaultStack"></interceptor-ref>
+    		<interceptor-ref name="fileUpload">
+    			<param name="maximumSize">20M</param>
+    		</interceptor-ref>
+    		<result type="redirectAction">
+    		<param name="actionName">student_getDocuments?period=${#request.period}</param>  
+            <param name="namespace">/student</param>
+            </result>
+    		<result name="input">/fileError.jsp</result>
+    	</action>
+       <action name="download" class="action.FileDownloadAction">
+    		<param name="inputPath">/resource</param>
+    		<result name="success" type="stream">
+    			<param name="contentType">application/octet-stream</param>
+    			<param name="inputStream">inputName</param>
+    			<param name="contentDisposition">attachment;filename="${downloadFileName}"</param>
+    			<param name="bufferSize">8192</param>
+    		</result>
+    	</action>
+    	
+		<action name="login" class="action.LoginAction" method="login">
+			<result name="student_login" type="chain">skipto_student_login</result>
+			<result name="teacher_login" type="chain">skipto_teacher_login</result>
+			<result name="admin_login" type="chain">skipto_admin_login</result>
+			<result name="input">/login.jsp</result>
+		</action>
+		<action name="logout" class="action.LoginAction" method="logout">
+			<result>/login.jsp</result>
+		</action>
+	  <action name="skipto_student_login">   
+        	<result type="chain">  
+            <param name="actionName">student_login</param>  
+            <param name="namespace">/student</param>  
+        	</result>  
+      </action>
+      <action name="skipto_teacher_login">   
+        	<result type="chain">  
+            <param name="actionName">teacher_login</param>  
+            <param name="namespace">/teacher</param>  
+        	</result>  
+      </action>
+      <action name="skipto_admin_login">   
+        	<result type="chain">  
+            <param name="actionName">admin_login</param>  
+            <param name="namespace">/admin</param>  
+        	</result>  
+      </action> 
+    </package>
+
+	<package name="student" namespace="/student" extends="default">
+			<default-action-ref name="notFound" />
+   			<action name="notFound">
+    		<result>/error.jsp</result>
+   			</action>
+		
+		<action name="student_*" class="action.StudentAction" method="{1}">
+			<result name="student_login_success" type="chain">student_queryBulletinByStudentId</result>
+			<result name="student_login_failure">/login.jsp</result>
+			<result name="time_query_success">/student/student_project.jsp</result>
+			<result name="teacher_query_success">/student/teacher_information.jsp</result>
+			<result name="query_bulletin_success">/student/student_login_success.jsp</result>
+			<result name="query_project_success">/student/student_project_select.jsp</result>
+			<result name="student_query_success">/student/student_information.jsp</result>
+			<result name="student_changePassword_success">/student/student_modify_password.jsp</result>
+			<result name="student_selectProject_success" type="redirectAction">student_queryProjectByStudentId</result>
+			<result name="student_deleteProject_success" type="redirectAction">student_queryProjectByStudentId</result>
+			<result name="document">/student/student_document.jsp</result>
+			<result name="skipToUpload" type="chain">  
+            	<param name="actionName">upload</param>  
+            	<param name="namespace">/</param>  
+        	</result>
+        	<result name="skipToDownload" type="chain">  
+            	<param name="actionName">download</param>  
+            	<param name="namespace">/</param>  
+        	</result >
+        	<result name="delete_success" type="redirectAction">
+    		<param name="actionName">student_getDocuments?period=${#request.period}</param>  
+            </result>
+			<result name="input">/login.jsp</result>
+		</action>
+	</package>
+	
+	<package name="teacher" namespace="/teacher" extends="default">
+	
+			<default-action-ref name="notFound" />
+   			<action name="notFound">
+    		<result>/error.jsp</result>
+   			</action>
+		<action name="teacher_*" class="action.TeacherAction" method="{1}">
+			<result name="teacher_login_success" type="chain">teacher_queryBulletinsByTeacherId</result>
+			<result name="teacher_login_failure">/login.jsp</result>
+			<result name="bulletin_query_success">/teacher/teacher_login_success.jsp</result>
+			<result name="bulletin_delete_success" type="redirectAction">teacher_queryBulletinsByTeacherId</result>
+			<result name="bulletin_modify_success" type="redirectAction">teacher_queryBulletinsByTeacherId</result>
+			<result name="project_query_success">/teacher/teacher_project.jsp</result>
+			<result name="project_delete_success" type="redirectAction">teacher_queryProjectsByTeacherId</result>
+			<result name="project_modify_success" type="redirectAction">teacher_queryProjectsByTeacherId</result>
+			<result name="teacher_changePassword_success">/teacher/teacher_modify_password.jsp</result>
+			<result name="student_query_success">/teacher/teacher_student_manage.jsp</result>
+			<result name="teacher_information_update_success">/teacher/teacher_information.jsp</result>
+			<result name="teacher_time_update_success">/teacher/teacher_time.jsp</result>
+			<result name="teacher_check_success" type="redirectAction">teacher_queryStudentsByTeacherId</result>
+			<result name="download_error" type="redirectAction">teacher_getDocuments</result>
+			<result name="document">/teacher/student_document.jsp</result>
+			<result name="input">/login.jsp</result>
+			<result name="skipToDownload" type="chain">  
+            	<param name="actionName">download</param>  
+            	<param name="namespace">/</param>  
+        	</result >
+			<!-- <result name="input">/teacher/teacher_time.jsp</result> -->
+		</action>
+	</package>
+	
+	<package name="admin" namespace="/admin" extends="default">	
+		<default-action-ref name="notFound" />
+   			<action name="notFound">
+    		<result>/error.jsp</result>
+   			</action>
+		
+		<action name="admin_*" class="action.AdminAction" method="{1}">
+			<result name="admin_login_success">admin/admin_login_success.jsp</result>
+			<result name="admin_login_failure">/login.jsp</result>
+			<result name="admin_changePassword_success">/admin/admin_modify_password.jsp</result>
+			<result name="student_query_success">/admin/admin_student.jsp</result>
+			<result name="student_delete_success" type="redirectAction">admin_queryStudentsByStudentsId</result>
+			<result name="student_modify_success" type="redirectAction">admin_queryStudentsByStudentsId</result>
+			<result name="student_add_success" >/admin/admin_student_modify.jsp</result>
+			<result name="teacher_query_success">/admin/admin_teacher.jsp</result>
+			<result name="teacher_delete_success" type="redirectAction">admin_queryTeachersByTeachersId</result>
+			<result name="teacher_modify_success" type="redirectAction">admin_queryTeachersByTeachersId</result>
+			<result name="teacher_add_success" >/admin/admin_teacher_modify.jsp</result>
+			<result name="department_query_success">/admin/admin_department.jsp</result>
+			<result name="department_delete_success" type="redirectAction">admin_queryDepartmentsByDepartmentsId</result>
+			<result name="department_modify_success" type="redirectAction">admin_queryDepartmentsByDepartmentsId</result>
+			<result name="department_add_success" >/admin/admin_department_modify.jsp</result>
+			<result name="specialty_query_success">/admin/admin_specialty.jsp</result>
+			<result name="specialty_delete_success" type="redirectAction">admin_querySpecialtysBySpecialtysId</result>
+			<result name="specialty_modify_success" type="redirectAction">admin_querySpecialtysBySpecialtysId</result>
+			<result name="specialty_add_success" >/admin/admin_specialty_modify.jsp</result>
+			<result name="input">/login.jsp</result>
+		</action>
+	</package>
+	<!-- 	
+	<package name="students" namespace="/students" extends="default">
+		<action name="*_*" class="action.{1}Action" method="{2}">
+			<result name="query_success">/students/Students_query_success.jsp</result>
+			<result name="delete_success" type="chain">Students_query</result>
+			<result name="add_success">/students/Students_add_success.jsp</result>
+			<result name="save_success">/students/Students_modify_success.jsp</result>
+			<result name="modify_success">/students/Students_modify.jsp</result>
+		</action>
+	</package>
+	 -->
+</struts>
