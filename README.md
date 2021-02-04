@@ -7,4 +7,5 @@
   * Service层: Spring  
   * Web层: Struts2  
   * 日志: log4j  
+  * 测试: JUnit
   * 前端相关: jquery, bootstrap  
